@@ -17,6 +17,7 @@ current_projects = {}
 
 
 async def start_project(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     user_id = update.effective_user.id
 
     project_name = " ".join(context.args)
@@ -35,12 +36,15 @@ async def start_project(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def end_project(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     user_id = update.effective_user.id
 
     if user_id in current_projects:
         del current_projects[user_id]
 
-    await update.message.reply_text("🛑 Project Closed")
+    await update.message.reply_text(
+        "🛑 Project Closed"
+    )
 
 
 async def save_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -64,44 +68,41 @@ async def save_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # صور
         if update.message.photo:
 
-            await update.message.forward(
-                chat_id=CHANNEL_ID
-            )
-
-            await context.bot.send_message(
+            await context.bot.copy_message(
                 chat_id=CHANNEL_ID,
-                text=f"🖼 Image Saved\n{caption}"
+                from_chat_id=update.message.chat_id,
+                message_id=update.message.message_id,
+                caption=caption
             )
 
         # فيديو
         elif update.message.video:
 
-            await update.message.forward(
-                chat_id=CHANNEL_ID
-            )
-
-            await context.bot.send_message(
+            await context.bot.copy_message(
                 chat_id=CHANNEL_ID,
-                text=f"🎬 Video Saved\n{caption}"
+                from_chat_id=update.message.chat_id,
+                message_id=update.message.message_id,
+                caption=caption
             )
 
         # ملفات
         elif update.message.document:
 
-            await update.message.forward(
-                chat_id=CHANNEL_ID
-            )
-
-            await context.bot.send_message(
+            await context.bot.copy_message(
                 chat_id=CHANNEL_ID,
-                text=f"📦 File Saved\n{caption}"
+                from_chat_id=update.message.chat_id,
+                message_id=update.message.message_id,
+                caption=caption
             )
 
         # ألبومات
         elif update.message.media_group_id:
 
-            await update.message.forward(
-                chat_id=CHANNEL_ID
+            await context.bot.copy_message(
+                chat_id=CHANNEL_ID,
+                from_chat_id=update.message.chat_id,
+                message_id=update.message.message_id,
+                caption=caption
             )
 
         else:
@@ -112,6 +113,7 @@ async def save_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     except Exception as e:
+
         await update.message.reply_text(
             f"❌ Error: {e}"
         )
