@@ -1,8 +1,9 @@
+import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
 from datetime import datetime
 
-BOT_TOKEN = os.getenv("8319848858:AAEHrur1oWNjFtGM548heLcRycAaRQ0FBiQ")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_ID = "@mohammeddrivevault"
 
 async def save_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
