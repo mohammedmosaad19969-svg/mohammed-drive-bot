@@ -2,7 +2,6 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
 from datetime import datetime
 
-import os
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_ID = "@mohammeddrivevault"
 
