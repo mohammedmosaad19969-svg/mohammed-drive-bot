@@ -136,4 +136,3 @@ app.add_handler(
 print("🚀 Mohammed Drive Running")
 
 app.run_polling()
-```
