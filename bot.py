@@ -1,53 +1,139 @@
 import os
-
-from telegram import Update
-from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
 from datetime import datetime
+from telegram import Update
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    MessageHandler,
+    filters,
+    ContextTypes,
+)
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_ID = "@mohammeddrivevault"
 
+# حفظ المشروع الحالي لكل يوزر
+current_projects = {}
+
+
+async def start_project(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+
+    project_name = " ".join(context.args)
+
+    if not project_name:
+        await update.message.reply_text(
+            "❌ استخدم:\n/project Project Name"
+        )
+        return
+
+    current_projects[user_id] = project_name
+
+    await update.message.reply_text(
+        f"✅ Current Project:\n📁 {project_name}"
+    )
+
+
+async def end_project(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+
+    if user_id in current_projects:
+        del current_projects[user_id]
+
+    await update.message.reply_text("🛑 Project Closed")
+
+
 async def save_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not update.message:
+        return
+
+    user_id = update.effective_user.id
+
+    project_name = current_projects.get(
+        user_id,
+        "Untitled Project"
+    )
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-    caption = f"📁 Uploaded\n🕒 {now}"
+    caption = f"📁 {project_name}\n🕒 {now}"
 
     try:
 
-        if update.message and update.message.photo:
-            await update.message.forward(chat_id=CHANNEL_ID)
-            await context.bot.send_message(
-                chat_id=CHANNEL_ID,
-                text=f"🖼️ Image Saved\n{caption}\n#image"
+        # صور
+        if update.message.photo:
+
+            await update.message.forward(
+                chat_id=CHANNEL_ID
             )
 
-        elif update.message and update.message.video:
-            await update.message.forward(chat_id=CHANNEL_ID)
             await context.bot.send_message(
                 chat_id=CHANNEL_ID,
-                text=f"🎬 Video Saved\n{caption}\n#video"
+                text=f"🖼 Image Saved\n{caption}"
             )
 
-        elif update.message and update.message.document:
-            await update.message.forward(chat_id=CHANNEL_ID)
+        # فيديو
+        elif update.message.video:
+
+            await update.message.forward(
+                chat_id=CHANNEL_ID
+            )
+
             await context.bot.send_message(
                 chat_id=CHANNEL_ID,
-                text=f"📦 File Saved\n{caption}\n#file"
+                text=f"🎬 Video Saved\n{caption}"
+            )
+
+        # ملفات
+        elif update.message.document:
+
+            await update.message.forward(
+                chat_id=CHANNEL_ID
+            )
+
+            await context.bot.send_message(
+                chat_id=CHANNEL_ID,
+                text=f"📦 File Saved\n{caption}"
+            )
+
+        # ألبومات
+        elif update.message.media_group_id:
+
+            await update.message.forward(
+                chat_id=CHANNEL_ID
             )
 
         else:
-            await update.message.forward(chat_id=CHANNEL_ID)
+            return
 
-        await update.message.reply_text("✅ Saved To Mohammed Drive")
+        await update.message.reply_text(
+            f"✅ Saved To:\n📁 {project_name}"
+        )
 
     except Exception as e:
-        await update.message.reply_text(f"❌ Error: {e}")
+        await update.message.reply_text(
+            f"❌ Error: {e}"
+        )
+
 
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
-app.add_handler(MessageHandler(filters.ALL, save_file))
+# أوامر المشاريع
+app.add_handler(
+    CommandHandler("project", start_project)
+)
+
+app.add_handler(
+    CommandHandler("end", end_project)
+)
+
+# استقبال الملفات
+app.add_handler(
+    MessageHandler(filters.ALL, save_file)
+)
 
 print("🚀 Mohammed Drive Running")
 
 app.run_polling()
+```
