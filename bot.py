@@ -15,21 +15,21 @@ async def save_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
 
-        if update.message.photo:
+        if update.message and update.message.photo:
             await update.message.forward(chat_id=CHANNEL_ID)
             await context.bot.send_message(
                 chat_id=CHANNEL_ID,
                 text=f"🖼️ Image Saved\n{caption}\n#image"
             )
 
-        elif update.message.video:
+        elif update.message and update.message.video:
             await update.message.forward(chat_id=CHANNEL_ID)
             await context.bot.send_message(
                 chat_id=CHANNEL_ID,
                 text=f"🎬 Video Saved\n{caption}\n#video"
             )
 
-        elif update.message.document:
+       elif update.message and update.message.document:
             await update.message.forward(chat_id=CHANNEL_ID)
             await context.bot.send_message(
                 chat_id=CHANNEL_ID,
